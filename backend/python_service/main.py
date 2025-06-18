@@ -16,7 +16,10 @@ app = FastAPI(title="Quiz Generator AI Service")
 # Configure CORS (Cross-Origin Resource Sharing)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4000"],  # Your Node.js backend
+    allow_origins=[
+        "http://localhost:4000",
+        "https://quiz-akinator.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
