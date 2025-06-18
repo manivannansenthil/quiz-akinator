@@ -197,7 +197,7 @@ export default function QuizPage() {
         </button>
       ) : (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h2 className="text-2xl font-bold mb-4">
+          <h2 className="text-2xl font-bold mb-4 text-black">
             Your Score: {gradeResult?.correct} out of {gradeResult?.total}
           </h2>
           <p className="text-gray-600">

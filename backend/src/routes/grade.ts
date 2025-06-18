@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { Quiz } from "../models/Quiz";
+import { validateGradeRequest } from "../middleware/validation";
 
 const router = Router();
 
@@ -18,79 +20,68 @@ type GradeResponse = {
   feedback: Feedback[];
 };
 
-// Mock quiz data (this would come from MongoDB in production)
-const mockQuizzes: { [key: string]: any } = {
-  abc123: {
-    questions: [
-      {
-        id: 1,
-        text: "Sample question 1?",
-        options: ["A", "B", "C", "D"],
-        correctAnswer: "B",
-      },
-      {
-        id: 2,
-        text: "Sample question 2?",
-        options: ["A", "B", "C", "D"],
-        correctAnswer: "D",
-      },
-      {
-        id: 3,
-        text: "Sample question 3?",
-        options: ["A", "B", "C", "D"],
-        correctAnswer: "A",
-      },
-      {
-        id: 4,
-        text: "Sample question 4?",
-        options: ["A", "B", "C", "D"],
-        correctAnswer: "C",
-      },
-      {
-        id: 5,
-        text: "Sample question 5?",
-        options: ["A", "B", "C", "D"],
-        correctAnswer: "B",
-      },
-    ],
-  },
-};
-
-router.post("/", (req, res) => {
+router.post("/", validateGradeRequest, async (req, res) => {
   const { quizId } = req.query;
   const { answers } = req.body;
 
-  if (!quizId || !answers) {
-    return res.status(400).json({ error: "Missing quizId or answers" });
-  }
+  console.log("Received grade request:", { quizId, answers });
 
-  const quiz = mockQuizzes[quizId as string];
-  if (!quiz) {
-    return res.status(404).json({ error: "Quiz not found" });
-  }
+  try {
+    // Fetch the quiz from MongoDB
+    const quiz = await Quiz.findOne({ quizId });
+    console.log("Found quiz:", quiz ? "Yes" : "No");
 
-  let correct = 0;
-  const feedback: Feedback[] = [];
+    if (!quiz) {
+      return res.status(404).json({
+        error: "Quiz not found",
+        details: `No quiz found with ID: ${quizId}`,
+      });
+    }
 
-  quiz.questions.forEach((question: any) => {
-    const yourAnswer = answers[question.id.toString()];
-    const isCorrect = yourAnswer === question.correctAnswer;
-    if (isCorrect) correct++;
+    // Validate that all questions are answered
+    const unansweredQuestions = quiz.questions.filter(
+      (question) => !answers[question.id.toString()]
+    );
+    console.log("Unanswered questions:", unansweredQuestions);
 
-    feedback.push({
-      id: question.id,
-      yourAnswer: yourAnswer || "Not answered",
-      correctAnswer: question.correctAnswer,
+    if (unansweredQuestions.length > 0) {
+      return res.status(400).json({
+        error: "Incomplete answers",
+        details: `Questions ${unansweredQuestions
+          .map((q) => q.id)
+          .join(", ")} are not answered`,
+      });
+    }
+
+    let correct = 0;
+    const feedback: Feedback[] = [];
+
+    quiz.questions.forEach((question) => {
+      const yourAnswer = answers[question.id.toString()];
+      const isCorrect = yourAnswer === question.correctAnswer;
+      if (isCorrect) correct++;
+
+      feedback.push({
+        id: question.id,
+        yourAnswer: yourAnswer || "Not answered",
+        correctAnswer: question.correctAnswer,
+      });
     });
-  });
 
-  const response: GradeResponse = {
-    correct,
-    total: quiz.questions.length,
-    feedback,
-  };
+    const response: GradeResponse = {
+      correct,
+      total: quiz.questions.length,
+      feedback,
+    };
 
-  res.json(response);
+    res.json(response);
+  } catch (error) {
+    console.error("Error grading quiz:", error);
+    res.status(500).json({
+      error: "Failed to grade quiz",
+      details: "An unexpected error occurred while grading the quiz",
+    });
+  }
 });
 
 export default router;

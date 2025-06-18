@@ -3,8 +3,18 @@ import cors from "cors";
 import dotenv from "dotenv";
 import generateRouter from "./routes/generate";
 import gradeRouter from "./routes/grade";
-
+import mongoose from "mongoose";
 dotenv.config();
+
+const mongoUri =
+  process.env.MONGODB_URI || "mongodb://localhost:27017/quizakinator";
+mongoose
+  .connect(mongoUri)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ Failed to connect to MongoDB", err);
+    process.exit(1);
+  });
 
 const app = express();
 const port = process.env.PORT || 4000;
