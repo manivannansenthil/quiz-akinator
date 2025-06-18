@@ -27,7 +27,7 @@ type GradeResponse = {
   }[];
 };
 
-const API_BASE = "https://quiz-akinator.onrender.com"; // <-- your Render backend URL
+const API_BASE = "https://quiz-akinator-1.onrender.com"; // <-- your Render backend URL
 
 const QuizPage = () => {
   const searchParams = useSearchParams();
