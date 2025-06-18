@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import QuestionBlock from "../components/QuestionBlock";
+import QuizFeedback from "../components/QuizFeedback";
 
 type QuizQuestion = {
   id: number;
@@ -125,61 +127,14 @@ export default function QuizPage() {
       <h1 className="text-3xl font-bold mb-8 text-center">Quiz on: {topic}</h1>
 
       {quiz.map((question) => (
-        <div
+        <QuestionBlock
           key={question.id}
-          className="mb-8 bg-white rounded-lg shadow-md p-6"
-        >
-          <p className="font-semibold mb-4 text-lg text-black">
-            {question.id}. {question.question}
-          </p>
-          <div className="space-y-3">
-            {question.options.map((option, idx) => {
-              const optionLetter = String.fromCharCode(65 + idx); // 'A', 'B', ...
-              return (
-                <label
-                  key={option}
-                  className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors text-black ${
-                    submitted
-                      ? optionLetter ===
-                        gradeResult?.feedback.find((f) => f.id === question.id)
-                          ?.correctAnswer
-                        ? "bg-green-100"
-                        : answers[question.id] === optionLetter
-                        ? "bg-red-100"
-                        : "bg-gray-50"
-                      : answers[question.id] === optionLetter
-                      ? "bg-blue-50"
-                      : "bg-gray-50 hover:bg-gray-100"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    value={optionLetter}
-                    checked={answers[question.id] === optionLetter}
-                    onChange={() => handleSelect(question.id, optionLetter)}
-                    disabled={submitted}
-                    className="mr-3"
-                  />
-                  <span>
-                    {optionLetter}. {option}
-                  </span>
-                  {submitted && (
-                    <span className="ml-auto">
-                      {optionLetter ===
-                      gradeResult?.feedback.find((f) => f.id === question.id)
-                        ?.correctAnswer
-                        ? "✓"
-                        : answers[question.id] === optionLetter
-                        ? "✗"
-                        : ""}
-                    </span>
-                  )}
-                </label>
-              );
-            })}
-          </div>
-        </div>
+          question={question}
+          selectedAnswer={answers[question.id]}
+          submitted={submitted}
+          feedback={gradeResult?.feedback.find((f) => f.id === question.id)}
+          onSelect={handleSelect}
+        />
       ))}
 
       {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -204,18 +159,11 @@ export default function QuizPage() {
           )}
         </button>
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-black">
-            Your Score: {gradeResult?.correct} out of {gradeResult?.total}
-          </h2>
-          <p className="text-gray-600">
-            {gradeResult?.correct === gradeResult?.total
-              ? "Perfect score! 🎉"
-              : gradeResult && gradeResult.correct / gradeResult.total >= 0.8
-              ? "Great job! 🌟"
-              : "Keep practicing! 💪"}
-          </p>
-        </div>
+        <QuizFeedback
+          correct={gradeResult?.correct || 0}
+          total={gradeResult?.total || 0}
+          feedback={gradeResult?.feedback || []}
+        />
       )}
     </div>
   );
