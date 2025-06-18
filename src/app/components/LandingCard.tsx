@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-// Add animation styles
-const floatingTitleStyle: React.CSSProperties = {
-  animation: "floatY 3.5s ease-in-out infinite",
-  display: "inline-block",
-};
-
 const LandingCard: React.FC = () => {
   const [showTitle, setShowTitle] = useState(false);
   const [showSubtitle, setShowSubtitle] = useState(false);

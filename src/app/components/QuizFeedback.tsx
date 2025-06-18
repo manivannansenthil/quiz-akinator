@@ -9,14 +9,9 @@ type Feedback = {
 type QuizFeedbackProps = {
   correct: number;
   total: number;
-  feedback: Feedback[];
 };
 
-const QuizFeedback: React.FC<QuizFeedbackProps> = ({
-  correct,
-  total,
-  feedback,
-}) => (
+const QuizFeedback: React.FC<QuizFeedbackProps> = ({ correct, total }) => (
   <div className="bg-white rounded-lg shadow-md p-6 text-center">
     <h2 className="text-2xl font-bold mb-4 text-black">
       Your Score: {correct} out of {total}
