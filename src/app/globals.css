@@ -29,3 +29,121 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+.radio-input {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.radio-input .label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  font-family: "Satoshi", "Inter", Arial, sans-serif;
+  font-size: 1.08rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #181818;
+  background: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  transition: background 0.18s;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.radio-input .label:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.radio-input .label .check {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 2px solid #e5e7eb;
+  box-shadow: none;
+  margin-right: 0.7rem;
+  background: #fff;
+}
+
+.radio-input .label input:checked + .check {
+  border: 2.5px solid #22c55e;
+  background: #e6f9ed;
+  box-shadow: 0 0 0 2px #22c55e22;
+  transform: scale(1.08);
+}
+
+.radio-input .label input:disabled + .check {
+  opacity: 0.7;
+}
+
+.option-label {
+  margin-bottom: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: background 0.18s;
+  margin-top: 8px;
+}
+
+.option-label:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.option-label:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.question-card {
+  background: #f7f7f9;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 1.5px 8px 0 rgba(0, 0, 0, 0.04);
+}
+
+.start-quiz-btn {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  animation: pulse-glow-white 3s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  border: none !important;
+}
+
+@keyframes pulse-glow-white {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+}
+
+.shiny-gold-text {
+  background: linear-gradient(90deg, #ffd700 0%, #fffbea 40%, #ffd700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  font-weight: 600;
+}
+
+.shiny-gold-border {
+  border: 1.5px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image: linear-gradient(#181818cc, #181818cc),
+    linear-gradient(90deg, #ffd700 0%, #fffbea 40%, #ffd700 100%);
+}

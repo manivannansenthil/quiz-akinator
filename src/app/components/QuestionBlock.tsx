@@ -29,21 +29,49 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
       <div className="space-y-3">
         {question.options.map((option, idx) => {
           const optionLetter = String.fromCharCode(65 + idx); // 'A', 'B', ...
+          let highlight = "";
+          let icon = null;
+          let overlay = null;
+          if (submitted) {
+            if (optionLetter === feedback?.correctAnswer) {
+              highlight = "bg-green-100";
+              icon = <span className="ml-2 text-green-600 font-bold">✓</span>;
+              overlay = (
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(34,197,94,0.18)",
+                    borderRadius: "8px",
+                    pointerEvents: "none",
+                  }}
+                ></span>
+              );
+            } else if (selectedAnswer === optionLetter) {
+              highlight = "bg-red-100";
+              icon = <span className="ml-2 text-red-500 font-bold">✗</span>;
+              overlay = (
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(239,68,68,0.18)",
+                    borderRadius: "8px",
+                    pointerEvents: "none",
+                  }}
+                ></span>
+              );
+            } else {
+              highlight = "bg-gray-50";
+            }
+          }
           return (
             <label
               key={option}
-              className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors text-black ${
-                submitted
-                  ? optionLetter === feedback?.correctAnswer
-                    ? "bg-green-100"
-                    : selectedAnswer === optionLetter
-                    ? "bg-red-100"
-                    : "bg-gray-50"
-                  : selectedAnswer === optionLetter
-                  ? "bg-blue-50"
-                  : "bg-gray-50 hover:bg-gray-100"
-              }`}
+              className={`label option-label p-0 cursor-pointer transition-colors text-black flex items-center gap-2 relative ${highlight}`}
+              style={{ borderRadius: 8 }}
             >
+              {overlay}
               <input
                 type="radio"
                 name={`question-${question.id}`}
@@ -53,18 +81,8 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
                 disabled={submitted}
                 className="mr-3"
               />
-              <span>
-                {optionLetter}. {option}
-              </span>
-              {submitted && (
-                <span className="ml-auto">
-                  {optionLetter === feedback?.correctAnswer
-                    ? "✓"
-                    : selectedAnswer === optionLetter
-                    ? "✗"
-                    : ""}
-                </span>
-              )}
+              <span>{option}</span>
+              {submitted && <span className="ml-auto">{icon}</span>}
             </label>
           );
         })}

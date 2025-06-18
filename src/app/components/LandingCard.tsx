@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Add animation styles
 const floatingTitleStyle: React.CSSProperties = {
@@ -7,7 +7,23 @@ const floatingTitleStyle: React.CSSProperties = {
 };
 
 const LandingCard: React.FC = () => {
+  const [showTitle, setShowTitle] = useState(false);
+  const [showSubtitle, setShowSubtitle] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [topic, setTopic] = useState("");
+
+  useEffect(() => {
+    setShowTitle(true);
+    const timer = setTimeout(() => setShowSubtitle(true), 900);
+    let formTimer: NodeJS.Timeout;
+    if (showSubtitle) {
+      formTimer = setTimeout(() => setShowForm(true), 2000);
+    }
+    return () => {
+      clearTimeout(timer);
+      if (formTimer) clearTimeout(formTimer);
+    };
+  }, [showSubtitle]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +39,13 @@ const LandingCard: React.FC = () => {
         background: "rgba(24, 24, 24, 0.6)",
         border: "1px solid #333",
         boxShadow:
-          "0 2px 12px 0 rgba(0,0,0,0.10), inset 0 0 0.5px rgba(255,255,255,0.1)",
+          "0 8px 32px 0 rgba(0,0,0,0.22), 0 1.5px 8px 0 rgba(0,0,0,0.04), inset 0 0 0.5px rgba(255,255,255,0.1)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         overflow: "hidden",
         borderRadius: "3%",
+        minHeight: "420px",
+        minWidth: "370px",
       }}
     >
       {/* Mac window title bar */}
@@ -78,54 +96,76 @@ const LandingCard: React.FC = () => {
       <div className="p-8 space-y-8">
         <div>
           <h1
-            className="text-6xl font-semibold tracking-tight mb-2 text-center"
+            className="text-6xl font-semibold tracking-tight mb-2 text-center fade-in-title"
             style={{
               color: "var(--foreground)",
-              animation: "floatY 3.5s ease-in-out infinite",
+              animation: showTitle
+                ? "fadeIn 0.8s cubic-bezier(.4,0,.2,1) forwards, floatY 3s ease-in-out infinite"
+                : "none",
+              opacity: showTitle ? 1 : 0,
             }}
           >
             Quiz Akinator
           </h1>
-          <p className="text-center" style={{ color: "#FFD700cc" }}>
-            Enter a topic to start your quiz!
-          </p>
-        </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div>
-            <label htmlFor="topic" className="sr-only">
-              Quiz Topic
-            </label>
-            <input
-              id="topic"
-              name="topic"
-              type="text"
-              required
-              className="appearance-none rounded-lg relative block w-full px-3 py-2 border-[0.5px] border-yellow-400/40 placeholder-gray-400 text-gold-100 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 bg-black"
-              placeholder="e.g., History, Science, Movies..."
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
+          {showSubtitle && (
+            <p
+              className="text-center shiny-gold-text drop-bounce"
               style={{
-                color: "#FFD700",
-                background: "#181818cc",
-              }}
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md"
-              style={{
-                background: "var(--foreground)",
-                color: "#181818",
-                border: "1.5px solid var(--card-border)",
-                fontWeight: 700,
-                boxShadow: "none",
+                animation: showSubtitle
+                  ? "dropBounce 0.7s cubic-bezier(.4,1.6,.4,1)"
+                  : "none",
+                opacity: showSubtitle ? 1 : 0,
               }}
             >
-              Start Quiz
-            </button>
-          </div>
-        </form>
+              Enter a topic to start your quiz!
+            </p>
+          )}
+        </div>
+        {showForm && (
+          <form
+            onSubmit={handleSubmit}
+            className="mt-8 space-y-6 fade-in-form"
+            style={{
+              animation: showForm ? "fadeIn 2.5s" : "none",
+              opacity: showForm ? 1 : 0,
+            }}
+          >
+            <div>
+              <label htmlFor="topic" className="sr-only">
+                Quiz Topic
+              </label>
+              <input
+                id="topic"
+                name="topic"
+                type="text"
+                required
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 shiny-gold-border placeholder-gray-400 text-gold-100 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400/50 bg-black"
+                placeholder="e.g., History, Science, Movies..."
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                style={{
+                  color: "#FFD700",
+                  background: "#181818cc",
+                }}
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="group relative w-full flex justify-center py-2 px-4 text-sm font-semibold rounded-md start-quiz-btn"
+                style={{
+                  background: "#fff",
+                  color: "#181818",
+                  border: "none",
+                  fontWeight: 700,
+                  boxShadow: "none",
+                }}
+              >
+                Start Quiz
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -143,6 +183,33 @@ if (
       0% { transform: translateY(0); }
       50% { transform: translateY(-18px) scale(1.04); }
       100% { transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes dropBounce {
+      0% {
+        opacity: 0;
+        transform: translateY(-32px) rotate(-12deg) scale(1.08);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(12px) rotate(-6deg) scale(0.98);
+      }
+      75% {
+        transform: translateY(-8px) rotate(-3deg) scale(1.01);
+      }
+      85% {
+        transform: translateY(4px) rotate(-1deg) scale(0.99);
+      }
+      92% {
+        transform: translateY(-2px) rotate(-0.5deg) scale(1.01);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg) scale(1);
+      }
     }
   `;
   document.head.appendChild(style);
