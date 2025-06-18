@@ -5,10 +5,16 @@ from typing import List, Dict
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from motor.motor_asyncio import AsyncIOMotorClient
 
 # Load the .env file from the parent directory
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 print("Loaded OpenAI API key:", os.getenv("OPENAI_API_KEY"))
+
+# MongoDB connection
+MONGODB_URI = os.getenv("MONGODB_URI")
+mongo_client = AsyncIOMotorClient(MONGODB_URI)
+db = mongo_client["quizakinator"]  # <-- replace with your actual db name
 
 # Initialize FastAPI app
 app = FastAPI(title="Quiz Generator AI Service")
@@ -18,7 +24,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:4000",
-        "https://quiz-akinator.vercel.app"
+        "https://quiz-akinator.vercel.app",
+        "https://quiz-akinator-git-main-manivannansenthils-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
