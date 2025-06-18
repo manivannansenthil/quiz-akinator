@@ -74,6 +74,9 @@ export default function QuizPage() {
     setLoading(true);
     setError(null);
 
+    // Debug log
+    console.log("Submitting answers:", answers, "for quizId:", quizId);
+
     try {
       const response = await fetch(
         `http://localhost:4000/grade?quizId=${quizId}`,
@@ -117,8 +120,6 @@ export default function QuizPage() {
     );
   }
 
-  console.log(quiz);
-
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8 text-center">Quiz on: {topic}</h1>
@@ -132,46 +133,51 @@ export default function QuizPage() {
             {question.id}. {question.question}
           </p>
           <div className="space-y-3">
-            {question.options.map((option) => (
-              <label
-                key={option}
-                className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors text-black ${
-                  submitted
-                    ? option ===
+            {question.options.map((option, idx) => {
+              const optionLetter = String.fromCharCode(65 + idx); // 'A', 'B', ...
+              return (
+                <label
+                  key={option}
+                  className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors text-black ${
+                    submitted
+                      ? optionLetter ===
+                        gradeResult?.feedback.find((f) => f.id === question.id)
+                          ?.correctAnswer
+                        ? "bg-green-100"
+                        : answers[question.id] === optionLetter
+                        ? "bg-red-100"
+                        : "bg-gray-50"
+                      : answers[question.id] === optionLetter
+                      ? "bg-blue-50"
+                      : "bg-gray-50 hover:bg-gray-100"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question-${question.id}`}
+                    value={optionLetter}
+                    checked={answers[question.id] === optionLetter}
+                    onChange={() => handleSelect(question.id, optionLetter)}
+                    disabled={submitted}
+                    className="mr-3"
+                  />
+                  <span>
+                    {optionLetter}. {option}
+                  </span>
+                  {submitted && (
+                    <span className="ml-auto">
+                      {optionLetter ===
                       gradeResult?.feedback.find((f) => f.id === question.id)
                         ?.correctAnswer
-                      ? "bg-green-100"
-                      : answers[question.id] === option
-                      ? "bg-red-100"
-                      : "bg-gray-50"
-                    : answers[question.id] === option
-                    ? "bg-blue-50"
-                    : "bg-gray-50 hover:bg-gray-100"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={`question-${question.id}`}
-                  value={option}
-                  checked={answers[question.id] === option}
-                  onChange={() => handleSelect(question.id, option)}
-                  disabled={submitted}
-                  className="mr-3"
-                />
-                <span>{option}</span>
-                {submitted && (
-                  <span className="ml-auto">
-                    {option ===
-                    gradeResult?.feedback.find((f) => f.id === question.id)
-                      ?.correctAnswer
-                      ? "✓"
-                      : answers[question.id] === option
-                      ? "✗"
-                      : ""}
-                  </span>
-                )}
-              </label>
-            ))}
+                        ? "✓"
+                        : answers[question.id] === optionLetter
+                        ? "✗"
+                        : ""}
+                    </span>
+                  )}
+                </label>
+              );
+            })}
           </div>
         </div>
       ))}

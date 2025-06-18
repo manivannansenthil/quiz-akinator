@@ -31,6 +31,10 @@ router.post("/", validateGradeRequest, async (req, res) => {
     const quiz = await Quiz.findOne({ quizId });
     console.log("Found quiz:", quiz ? "Yes" : "No");
 
+    // Debug log
+    console.log("Quiz from DB:", quiz);
+    console.log("Answers received:", answers);
+
     if (!quiz) {
       return res.status(404).json({
         error: "Quiz not found",
