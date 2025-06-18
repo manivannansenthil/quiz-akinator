@@ -1,14 +1,13 @@
 import React from "react";
 
-type Feedback = {
-  id: number;
-  yourAnswer: string;
-  correctAnswer: string;
-};
-
 type QuizFeedbackProps = {
   correct: number;
   total: number;
+  feedback?: {
+    id: number;
+    yourAnswer: string;
+    correctAnswer: string;
+  }[];
 };
 
 const QuizFeedback: React.FC<QuizFeedbackProps> = ({ correct, total }) => (
