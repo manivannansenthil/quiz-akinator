@@ -555,3 +555,32 @@ body {
     opacity: 1;
   }
 }
+
+@keyframes slideLeftFade {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.92);
+  }
+}
+@keyframes slideRightFade {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
+  }
+}
+.animate-slide-left-fade {
+  animation: slideLeftFade 0.4s forwards;
+  z-index: 9;
+}
+.animate-slide-right-fade {
+  animation: slideRightFade 0.4s forwards;
+  z-index: 9;
+}
