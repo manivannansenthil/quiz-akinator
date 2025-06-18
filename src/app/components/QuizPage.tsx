@@ -27,6 +27,8 @@ type GradeResponse = {
   }[];
 };
 
+const API_BASE = "https://quiz-akinator.onrender.com"; // <-- your Render backend URL
+
 const QuizPage = () => {
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || "general knowledge";
@@ -47,8 +49,8 @@ const QuizPage = () => {
 
     setLoading(true);
     setError(null);
-
-    fetch(`http://localhost:4000/generate?topic=${encodeURIComponent(topic)}`)
+    // For quiz generation
+    fetch(`${API_BASE}/generate?topic=${encodeURIComponent(topic)}`)
       .then((res) => res.json())
       .then((data: QuizResponse) => {
         setQuiz(data.questions);
@@ -104,16 +106,13 @@ const QuizPage = () => {
     console.log("Submitting answers:", answers, "for quizId:", quizId);
 
     try {
-      const response = await fetch(
-        `http://localhost:4000/grade?quizId=${quizId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ answers }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/grade?quizId=${quizId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ answers }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to grade quiz");
