@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 // TypeScript interfaces
 export interface IQuestion {
   id: number;
-  text: string;
+  question: string;
   options: string[];
   correctAnswer: string;
 }
@@ -19,7 +19,7 @@ export interface IQuiz extends Document {
 // Mongoose Schema
 const QuestionSchema = new Schema<IQuestion>({
   id: { type: Number, required: true },
-  text: { type: String, required: true },
+  question: { type: String, required: true },
   options: [{ type: String, required: true }],
   correctAnswer: { type: String, required: true },
 });
@@ -34,7 +34,6 @@ const QuizSchema = new Schema<IQuiz>(
 );
 
 // Create indexes for better query performance
-QuizSchema.index({ quizId: 1 });
 QuizSchema.index({ topic: 1 });
 QuizSchema.index({ createdAt: -1 });
 

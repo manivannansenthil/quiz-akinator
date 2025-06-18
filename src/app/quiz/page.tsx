@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 type QuizQuestion = {
   id: number;
-  text: string;
+  question: string;
   options: string[];
 };
 
@@ -117,6 +117,8 @@ export default function QuizPage() {
     );
   }
 
+  console.log(quiz);
+
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8 text-center">Quiz on: {topic}</h1>
@@ -127,7 +129,7 @@ export default function QuizPage() {
           className="mb-8 bg-white rounded-lg shadow-md p-6"
         >
           <p className="font-semibold mb-4 text-lg text-black">
-            {question.id}. {question.text}
+            {question.id}. {question.question}
           </p>
           <div className="space-y-3">
             {question.options.map((option) => (
