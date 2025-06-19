@@ -2,6 +2,8 @@
 
 A full-stack application that lets users generate, take, and grade 5-question multiple-choice quizzes on **any** topic—all in under 10 seconds.
 
+***NOTE: please allow for up to a minute as the backend spins up on the loading screen 
+
 <p align="center">
   ![Alt text](https://github.com/user-attachments/assets/f88a1309-f42e-42f1-b825-47151d8d7c33)
 </p>
