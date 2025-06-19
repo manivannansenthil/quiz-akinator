@@ -70,8 +70,16 @@ const QuizPage = () => {
     } else if (topic) {
       // Generate new quiz
       fetch(`${API_BASE}/generate?topic=${encodeURIComponent(topic)}`)
-        .then((res) => res.json())
+        .then(async (res) => {
+          if (!res.ok) {
+            const text = await res.text();
+            console.error("Fetch failed:", res.status, text);
+            throw new Error(`Fetch failed: ${res.status} ${text}`);
+          }
+          return res.json();
+        })
         .then((data: QuizResponse) => {
+          console.log("Quiz data received:", data);
           setQuiz(data.questions);
           setQuizId(data.quizId);
           setAnswers({});
