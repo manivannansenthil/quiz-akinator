@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import QuestionBlock from "../components/QuestionBlock";
-import QuizFeedback from "../components/QuizFeedback";
+import FeedbackCard from "../components/QuizFeedback";
 import PixelWaveBackground from "../components/PixelWaveBackground";
 
 type QuizQuestion = {
@@ -27,7 +27,7 @@ type GradeResponse = {
   }[];
 };
 
-const API_BASE = "http://localhost:8000"; // <-- your Render backend URL "https://quiz-akinator-1.onrender.com"
+const API_BASE = "https://quiz-akinator-1.onrender.com"; // <-- your Render backend URL "http://localhost:8000"
 
 const QuizPage = () => {
   const searchParams = useSearchParams();
@@ -114,15 +114,6 @@ const QuizPage = () => {
     setAnimating(true);
     setTimeout(() => {
       setCurrentIdx((idx) => Math.min(idx + 1, quiz.length - 1));
-      setAnimating(false);
-    }, 400);
-  };
-
-  const handlePrev = () => {
-    setDirection("left");
-    setAnimating(true);
-    setTimeout(() => {
-      setCurrentIdx((idx) => Math.max(idx - 1, 0));
       setAnimating(false);
     }, 400);
   };
@@ -219,9 +210,6 @@ const QuizPage = () => {
     <div className="min-h-screen w-full relative flex items-center justify-center">
       <PixelWaveBackground />
       <div className="max-w-2xl mx-auto p-6 flex flex-col items-center justify-center w-full z-10">
-        <h1 className="text-3xl font-bold mb-8 text-center">
-          Quiz on: {topic}
-        </h1>
         {!submitted ? (
           <>
             <div
@@ -233,8 +221,8 @@ const QuizPage = () => {
                   className={`transition-all duration-400 ease-in-out absolute w-full ${
                     animating
                       ? direction === "right"
-                        ? "animate-slide-left-fade"
-                        : "animate-slide-right-fade"
+                        ? "animate-float-up-fade"
+                        : "animate-float-up-fade"
                       : "opacity-100 translate-x-0 z-10"
                   }`}
                   key={quiz[currentIdx].id}
@@ -248,81 +236,27 @@ const QuizPage = () => {
                       (f) => f.id === quiz[currentIdx].id
                     )}
                     onSelect={handleSelect}
+                    onNext={handleNext}
+                    showNext={currentIdx < quiz.length - 1}
+                    topic={topic}
+                    onSubmit={handleSubmit}
+                    submitDisabled={
+                      loading || Object.keys(answers).length !== quiz.length
+                    }
+                    submitLoading={loading}
                   />
                 </div>
               )}
             </div>
-            {/* Navigation Arrows */}
-            <div className="flex gap-4 justify-end w-full mt-4">
-              {currentIdx > 0 && (
-                <button
-                  className="rounded-full bg-neutral-200 hover:bg-neutral-300 text-neutral-700 p-3 shadow transition"
-                  onClick={handlePrev}
-                  disabled={animating}
-                  aria-label="Previous Question"
-                >
-                  <span style={{ fontSize: 22, fontWeight: 700 }}>&larr;</span>
-                </button>
-              )}
-              {currentIdx < quiz.length - 1 && (
-                <button
-                  className={`rounded-full bg-neutral-200 hover:bg-neutral-300 text-neutral-700 p-3 shadow transition ${
-                    !answers[quiz[currentIdx]?.id]
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
-                  onClick={handleNext}
-                  disabled={animating || !answers[quiz[currentIdx]?.id]}
-                  aria-label="Next Question"
-                >
-                  <span style={{ fontSize: 22, fontWeight: 700 }}>&rarr;</span>
-                </button>
-              )}
-            </div>
-            {/* Submit Button */}
-            {currentIdx === quiz.length - 1 && (
-              <button
-                className={`w-full py-3 rounded-lg text-white font-semibold transition-colors mt-8 ${
-                  loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-                onClick={handleSubmit}
-                disabled={
-                  loading || Object.keys(answers).length !== quiz.length
-                }
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
-                    Submitting...
-                  </span>
-                ) : (
-                  "Submit Quiz"
-                )}
-              </button>
-            )}
           </>
         ) : (
-          <>
-            {quiz.map((question) => (
-              <QuestionBlock
-                key={question.id}
-                question={question}
-                selectedAnswer={answers[question.id]}
-                submitted={submitted}
-                feedback={gradeResult?.feedback.find(
-                  (f) => f.id === question.id
-                )}
-                onSelect={handleSelect}
-              />
-            ))}
-            <QuizFeedback
-              correct={gradeResult?.correct || 0}
-              total={gradeResult?.total || 0}
-              feedback={gradeResult?.feedback || []}
-            />
-          </>
+          <FeedbackCard
+            topic={topic}
+            questions={quiz}
+            feedback={gradeResult?.feedback || []}
+            correct={gradeResult?.correct || 0}
+            total={gradeResult?.total || 0}
+          />
         )}
       </div>
     </div>

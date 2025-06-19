@@ -11,7 +11,7 @@ const LandingCard: React.FC = () => {
     const timer = setTimeout(() => setShowSubtitle(true), 900);
     let formTimer: NodeJS.Timeout;
     if (showSubtitle) {
-      formTimer = setTimeout(() => setShowForm(true), 2000);
+      formTimer = setTimeout(() => setShowForm(true), 600);
     }
     return () => {
       clearTimeout(timer);
@@ -120,7 +120,7 @@ const LandingCard: React.FC = () => {
             onSubmit={handleSubmit}
             className="mt-8 space-y-6 fade-in-form"
             style={{
-              animation: showForm ? "fadeIn 2.5s" : "none",
+              animation: showForm ? "fadeIn 1s" : "none",
               opacity: showForm ? 1 : 0,
             }}
           >

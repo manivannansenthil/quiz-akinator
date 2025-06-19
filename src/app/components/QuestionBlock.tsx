@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./QuizCard.module.css";
 
 export type QuestionBlockProps = {
   question: {
@@ -12,6 +13,12 @@ export type QuestionBlockProps = {
     correctAnswer: string;
   };
   onSelect: (questionId: number, answer: string) => void;
+  onNext: () => void;
+  showNext: boolean;
+  topic: string;
+  onSubmit?: () => void;
+  submitDisabled?: boolean;
+  submitLoading?: boolean;
 };
 
 const QuestionBlock: React.FC<QuestionBlockProps> = ({
@@ -20,72 +27,111 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
   submitted,
   feedback,
   onSelect,
+  onNext,
+  showNext,
+  topic,
+  onSubmit,
+  submitDisabled,
+  submitLoading,
 }) => {
   return (
-    <div className="mb-8 bg-white rounded-lg shadow-md p-6">
-      <p className="font-semibold mb-4 text-lg text-black">
-        {question.id}. {question.question}
-      </p>
-      <div className="space-y-3">
-        {question.options.map((option, idx) => {
-          const optionLetter = String.fromCharCode(65 + idx); // 'A', 'B', ...
-          let highlight = "";
-          let icon = null;
-          let overlay = null;
-          if (submitted) {
-            if (optionLetter === feedback?.correctAnswer) {
-              highlight = "bg-green-100";
-              icon = <span className="ml-2 text-green-600 font-bold">✓</span>;
-              overlay = (
-                <span
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(34,197,94,0.18)",
-                    borderRadius: "8px",
-                    pointerEvents: "none",
-                  }}
-                ></span>
-              );
-            } else if (selectedAnswer === optionLetter) {
-              highlight = "bg-red-100";
-              icon = <span className="ml-2 text-red-500 font-bold">✗</span>;
-              overlay = (
-                <span
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(239,68,68,0.18)",
-                    borderRadius: "8px",
-                    pointerEvents: "none",
-                  }}
-                ></span>
-              );
-            } else {
-              highlight = "bg-gray-50";
+    <div className={styles.card}>
+      <div className={styles.tools}>
+        <div className={styles.circle}>
+          <span className={`${styles.box} ${styles.red}`}></span>
+        </div>
+        <div className={styles.circle}>
+          <span className={`${styles.box} ${styles.yellow}`}></span>
+        </div>
+        <div className={styles.circle}>
+          <span className={`${styles.box} ${styles.green}`}></span>
+        </div>
+        <div className={styles.title}>{topic}</div>
+      </div>
+      <div className={styles.content}>
+        <div className={styles.question}>{question.question}</div>
+        <div className={styles["radio-container"]}>
+          {question.options.map((option, idx) => {
+            const optionLetter = String.fromCharCode(65 + idx); // 'A', 'B', ...
+            let optionClass = styles["radio-wrapper"];
+            if (submitted && feedback) {
+              if (optionLetter === feedback.correctAnswer) {
+                optionClass += " " + styles["radio-correct"];
+              } else if (
+                selectedAnswer === optionLetter &&
+                selectedAnswer !== feedback.correctAnswer
+              ) {
+                optionClass += " " + styles["radio-incorrect"];
+              }
             }
-          }
-          return (
-            <label
-              key={option}
-              className={`label option-label p-0 cursor-pointer transition-colors text-black flex items-center gap-2 relative ${highlight}`}
-              style={{ borderRadius: 8 }}
+            return (
+              <div className={optionClass} key={option}>
+                <label className={styles["radio-button"]}>
+                  <input
+                    type="radio"
+                    name={`question-${question.id}`}
+                    value={optionLetter}
+                    checked={selectedAnswer === optionLetter}
+                    onChange={() => onSelect(question.id, optionLetter)}
+                    disabled={submitted}
+                  />
+                  <span className={styles["radio-checkmark"]}></span>
+                  <span className={styles["radio-label"]}>{option}</span>
+                </label>
+              </div>
+            );
+          })}
+        </div>
+        {submitted && feedback && (
+          <div className={styles.feedback}>
+            <span
+              style={{
+                color:
+                  selectedAnswer === feedback.correctAnswer
+                    ? "#00c850"
+                    : "#ff3b3b",
+              }}
             >
-              {overlay}
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value={optionLetter}
-                checked={selectedAnswer === optionLetter}
-                onChange={() => onSelect(question.id, optionLetter)}
-                disabled={submitted}
-                className="mr-3"
-              />
-              <span>{option}</span>
-              {submitted && <span className="ml-auto">{icon}</span>}
-            </label>
-          );
-        })}
+              {selectedAnswer === feedback.correctAnswer
+                ? "✅ Correct!"
+                : `❌ Correct answer: ${feedback.correctAnswer}`}
+            </span>
+          </div>
+        )}
+        {showNext && (
+          <button
+            className={styles.nextButton}
+            onClick={onNext}
+            aria-label="Next Question"
+          >
+            <span
+              className={
+                styles.arrowIcon +
+                (question.id === 1 && !submitted
+                  ? " " + styles["animate-arrow"]
+                  : "")
+              }
+            >
+              &rarr;
+            </span>
+          </button>
+        )}
+        {!showNext && !submitted && (
+          <button
+            className={styles.submitButton}
+            onClick={onSubmit}
+            disabled={submitDisabled}
+          >
+            {submitLoading ? (
+              <span className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                Submitting...
+              </span>
+            ) : (
+              "Submit Quiz"
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
