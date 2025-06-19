@@ -105,6 +105,12 @@ async def get_quiz(quizId: str) -> QuizResponse:
     quiz_doc.pop("_id", None)
     return QuizResponse(**quiz_doc)
 
+@app.on_event("startup")
+async def list_routes():
+    print("Registered routes:")
+    for route in app.routes:
+        print(route.path)
+
 # Run the server
 if __name__ == "__main__":
     import uvicorn
