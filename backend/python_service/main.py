@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict
@@ -25,6 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:4000",
+           "http://localhost:3000",
         "https://quiz-akinator.vercel.app",
         "https://quiz-akinator-git-main-manivannansenthils-projects.vercel.app"
     ],
@@ -46,6 +47,16 @@ class Question(BaseModel):
 class QuizResponse(BaseModel):
     quizId: str
     questions: List[Question]
+
+class GradeFeedback(BaseModel):
+    id: int
+    yourAnswer: str
+    correctAnswer: str
+
+class GradeResponse(BaseModel):
+    correct: int
+    total: int
+    feedback: List[GradeFeedback]
 
 def generate_quiz_prompt(topic: str) -> str:
     return f"""Generate a quiz about {topic} with 5 multiple choice questions.
@@ -104,6 +115,25 @@ async def get_quiz(quizId: str) -> QuizResponse:
     # Remove MongoDB's _id field before returning
     quiz_doc.pop("_id", None)
     return QuizResponse(**quiz_doc)
+
+@app.post("/grade", response_model=GradeResponse)
+async def grade_quiz(request: Request, quizId: str):
+    data = await request.json()
+    answers = data.get("answers", {})
+    quiz_doc = await db.quizakinatorcollect.find_one({"quizId": quizId})
+    if not quiz_doc:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    questions = quiz_doc["questions"]
+    correct = 0
+    feedback = []
+    for q in questions:
+        qid = str(q["id"])
+        your_answer = answers.get(qid, "")
+        correct_answer = q["correctAnswer"]
+        if your_answer == correct_answer:
+            correct += 1
+        feedback.append(GradeFeedback(id=q["id"], yourAnswer=your_answer, correctAnswer=correct_answer))
+    return GradeResponse(correct=correct, total=len(questions), feedback=feedback)
 
 @app.on_event("startup")
 async def list_routes():
