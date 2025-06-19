@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌟 Quiz Akinator
 
-## Getting Started
+A full-stack application that lets users generate, take, and grade 5-question multiple-choice quizzes on **any** topic—all in under 10 seconds.
 
-First, run the development server:
+<p align="center">
+  ![image](https://github.com/user-attachments/assets/f88a1309-f42e-42f1-b825-47151d8d7c33)
+</p>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Live Demo
+
+| Service | URL |
+|---------|-----|
+| Front-end (Next.js) | 🔸 https://quiz-akinator.vercel.app |
+| Back-end API        | 🔸 https://quiz-akinator-1.onrender.com |
+---
+
+## 🗺️  Architecture
+Next.js (TS)       Node.js/Express (TS)        FastAPI (Python)
+┌──────────────┐   ┌──────────────────────┐   ┌───────────────────┐
+│ /quiz?topic  │   │ GET /generate        │   │ POST /generate    │
+│              ├──►│ POST /grade          ├──►│ (OpenAI call)     │
+│ UI & Fetch   │   │ MongoDB Atlas        │   └───────────────────┘
+└──────────────┘   └──────────────────────┘
+▲                   │
+└────── Webhooks ←──┘
+
+---
+
+## 🧑‍💻  Tech Stack
+
+| Layer             | Tech |
+|-------------------|------|
+| **Front-end**     | Next.js 15, TypeScript, Tailwind CSS, Framer-Motion |
+| **API**           | Node.js 20, Express 5, TypeScript, Zod (validation) |
+| **AI Service**    | Python 3.11, FastAPI, Pydantic, OpenAI GPT-4o |
+| **Database**      | MongoDB Atlas (serverless M0) |
+| **Deployment**    | Front-end on Vercel; Back-end & AI on Render |
+| **CI & Lint**     | GitHub Actions, ESLint, Prettier |
+
+---
+
+## 🚀  Local Development
+
+### 1. Clone & install:
+
+```
+git clone https://github.com/<your-org>/topic-quiz-creator.git
+cd topic-quiz-creator
+pnpm install   # or npm / yarn
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+You will need to create your own key here https://platform.openai.com/api-keys
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# .env
+OPENAI_API_KEY=sk-••••
+MONGODB_URI=[point towards local mongodb instance]
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# back-end
+cd backend && pnpm dev
+# AI service
+cd ai-service && uvicorn app:app --reload
+# front-end
+cd frontend && pnpm dev
 
-## Learn More
+📑  API Reference
 
-To learn more about Next.js, take a look at the following resources:
+GET /generate?topic=<topic>
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+200 OK
+{
+  "quizId": "64f9…",
+  "questions": [
+    { "id": 1, "text": "…", "options": ["A","B","C","D"] },
+    …
+  ]
+}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+POST /grade?quizId=<id>
 
-## Deploy on Vercel
+Body
+{ "answers": { "1": "B", "2": "D", … } }
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+200 OK
+{
+  "correct": 4,
+  "total": 5,
+  "feedback": [
+    { "id": 1, "yourAnswer":"B", "correctAnswer":"B" },
+    …
+  ]
+}
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏗️ Architectural Trade-offs
+
+- **Separation of Concerns:** The AI service is isolated from the main API for security and modularity.
+- **Cold Start Latency:** Free-tier deployments (Render) may have slow cold starts.
+- **Monorepo vs. Polyrepo:** Chose monorepo for easier local dev, but each service is containerized for flexibility.
+- **No Auth:** For demo simplicity, no user accounts or quiz history.
+  
+## 🧪 Pseudo-Tests (What to Test)
+
+- **Unit Tests**
+  - `/generate` returns 5 questions for valid topic
+  - `/grade` returns correct score for valid answers
+  - Validation rejects malformed requests
+
+- **Integration Tests**
+  - Full quiz flow: generate → answer → grade
+  - Handles invalid/missing topic gracefully
+  - Handles AI service downtime gracefully
+
+- **Front-end**
+  - Renders quiz and feedback correctly
+  - Shows loading and error states
+  - Disables submit until all questions answered
+
+## 🛠️ Troubleshooting
+
+- **Build fails on Vercel:** Try clearing build cache and redeploying.
+- **API 500 errors:** Check environment variables and AI service health.
+- **MongoDB connection issues:** Ensure IP whitelist and correct URI.
