@@ -73,6 +73,7 @@ You will need to create your own key here https://platform.openai.com/api-keys
 
 # .env
 OPENAI_API_KEY=sk-••••
+
 MONGODB_URI=[point towards local mongodb instance]
 
 # back-end
