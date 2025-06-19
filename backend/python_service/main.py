@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from motor.motor_asyncio import AsyncIOMotorClient
+import uuid
 
 # Load the .env file from the parent directory
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -79,18 +80,33 @@ async def generate_quiz(topic: str) -> QuizResponse:
             ],
             temperature=0.7
         )
-        
-        # Parse the response
         quiz_data = response.choices[0].message.content
-        return QuizResponse.model_validate_json(quiz_data)
-    
+        quiz = QuizResponse.model_validate_json(quiz_data)
+
+        # Generate a unique quizId and assign it
+        quiz.quizId = str(uuid.uuid4())
+
+        # Save to MongoDB
+        await db.quizakinatorcollect.insert_one(quiz.model_dump())
+
+        return quiz
     except Exception as e:
         import traceback
         print("Error in /generate:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/quiz")
+async def get_quiz(quizId: str) -> QuizResponse:
+    quiz_doc = await db.quizakinatorcollect.find_one({"quizId": quizId})
+    if not quiz_doc:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    # Remove MongoDB's _id field before returning
+    quiz_doc.pop("_id", None)
+    return QuizResponse(**quiz_doc)
+
 # Run the server
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5001) 
+    port = int(os.environ.get("PORT", 5001))
+    uvicorn.run(app, host="0.0.0.0", port=port) 

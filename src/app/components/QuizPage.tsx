@@ -32,6 +32,7 @@ const API_BASE = "https://quiz-akinator-1.onrender.com"; // <-- your Render back
 const QuizPage = () => {
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || "general knowledge";
+  const quizIdParam = searchParams.get("quizId");
 
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
   const [quizId, setQuizId] = useState<string>("");
@@ -45,26 +46,51 @@ const QuizPage = () => {
   const [direction, setDirection] = useState<"left" | "right">("right");
 
   useEffect(() => {
-    if (!topic) return;
-
     setLoading(true);
     setError(null);
-    // For quiz generation
-    fetch(`${API_BASE}/generate?topic=${encodeURIComponent(topic)}`)
-      .then((res) => res.json())
-      .then((data: QuizResponse) => {
-        setQuiz(data.questions);
-        setQuizId(data.quizId);
-        setAnswers({});
-      })
-      .catch((error) => {
-        console.error("Error fetching quiz:", error);
-        setError("Failed to load quiz. Please try again.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [topic]);
+    if (quizIdParam) {
+      // Fetch quiz by quizId
+      fetch(`${API_BASE}/quiz?quizId=${encodeURIComponent(quizIdParam)}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Quiz not found");
+          return res.json();
+        })
+        .then((data: QuizResponse) => {
+          setQuiz(data.questions);
+          setQuizId(data.quizId);
+          setAnswers({});
+        })
+        .catch((error) => {
+          console.error("Error fetching quiz by ID:", error);
+          setError("Failed to load quiz. Please try again.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else if (topic) {
+      // Generate new quiz
+      fetch(`${API_BASE}/generate?topic=${encodeURIComponent(topic)}`)
+        .then((res) => res.json())
+        .then((data: QuizResponse) => {
+          setQuiz(data.questions);
+          setQuizId(data.quizId);
+          setAnswers({});
+          // Update URL with quizId for sharing/retrieval
+          if (window && window.history && data.quizId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set("quizId", data.quizId);
+            window.history.replaceState({}, "", url.toString());
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching quiz:", error);
+          setError("Failed to load quiz. Please try again.");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [topic, quizIdParam]);
 
   const handleSelect = (questionId: number, answer: string) => {
     setAnswers((prev) => ({
